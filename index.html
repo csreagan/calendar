@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard__header">
+      <p class="eyebrow" id="today-date">Loading date…</p>
+      <h1 class="dashboard__title">Dashboard</h1>
+    </header>
+    <main class="dashboard__grid">
+      <section class="card card--clock" aria-label="Current time">
+        <div class="clock">
+          <svg class="clock__ring" viewBox="0 0 200 200" aria-hidden="true">
+            <circle class="clock__ring-track" cx="100" cy="100" r="90" />
+            <circle class="clock__ring-progress" id="ring-progress" cx="100" cy="100" r="90" />
+          </svg>
+          <div class="clock__face">
+            <span class="clock__time" id="clock-time">--:--:--</span>
+            <span class="clock__period" id="clock-period"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card--weather" aria-label="Weather">
+        <p class="eyebrow">Weather</p>
+        <div id="weather-content">
+          <p class="card__placeholder">Loading…</p>
+        </div>
+      </section>
+
+      <section class="card card--checklist" aria-label="Activities">
+        <p class="eyebrow">Activities</p>
+        <form id="checklist-form">
+          <input type="text" id="checklist-input" placeholder="Add an activity…" autocomplete="off" />
+        </form>
+        <ul id="checklist-items"></ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/clock.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/checklist.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
