@@ -100,7 +100,29 @@ document.getElementById('checklist-items').addEventListener('change', (event) =>
   saveItems(TODAY_KEY, todayItems);
   renderChecklist();
 });
+// --- Daily reset for recurring items ---
 
+const RESET_DATE_KEY = 'dashboard:recurringResetDate';
+
+function getTodayString() {
+  return new Date().toDateString(); // e.g. "Thu Aug 06 2026"
+}
+
+function checkDailyReset() {
+  const lastResetDate = localStorage.getItem(RESET_DATE_KEY);
+  const today = getTodayString();
+
+  if (lastResetDate === today) return; // already reset today, nothing to do
+
+  recurringItems.forEach((item) => {
+    item.checked = false;
+  });
+
+  saveItems(RECURRING_KEY, recurringItems);
+  localStorage.setItem(RESET_DATE_KEY, today);
+  renderChecklist();
+}
 // --- Initial render on page load ---
-
+checkDailyReset();
 renderChecklist();
+setInterval(checkDailyReset, 60 * 1000);
