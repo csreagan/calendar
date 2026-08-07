@@ -1,225 +1,298 @@
 :root {
-    --bg:            #12151c;
-    --panel:         #1b1f2a;
-    --panel-border:  #2a3040;
-    --text:          #e8e6e0;
-    --text-muted:    #8b93a7;
-    --accent-clock:  #f2a65a;
-    --accent-day:    #f2a65a;
-    --accent-night:  #3d5a8a;
-    --font-display: 'JetBrains Mono', monospace;
-    --font-body:    'Space Grotesk', sans-serif;
-    --radius: 16px;
-    --gap: 24px;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--gap);
-  }
-  
-  .dashboard {
-    width: 100%;
-    max-width: 960px;
-  }
+  --bg:            #12151c;
+  --panel:         #1b1f2a;
+  --panel-border:  #2a3040;
+  --text:          #e8e6e0;
+  --text-muted:    #8b93a7;
+  --accent-clock:  #f2a65a;
+  --font-display: 'JetBrains Mono', monospace;
+  --font-body:    'Space Grotesk', sans-serif;
+  --radius: 16px;
+  --gap: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap);
+}
+
+.dashboard {
+  width: 100%;
+  max-width: 960px;
+}
+
+.dashboard__header {
+  margin-bottom: var(--gap);
+}
+
+.eyebrow {
+  margin: 0 0 4px 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dashboard__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   GRID — left column (clock+weather row, then calendar) / right column
+   (activities). Two grid items in one implicit row; the right item
+   stretches to match the left column's full height automatically —
+   that's CSS Grid's default behavior (align-items: stretch), so no extra
+   code is needed to make Activities match the combined height.
+   ========================================================================== */
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap);
+}
+
+@media (min-width: 900px) {
   .dashboard__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--gap);
+    grid-template-columns: 2fr 1fr;
   }
-  
-  @media (min-width: 720px) {
-    .dashboard__grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .card--clock {
-      grid-column: 1 / -1;
-    }
-  }
-  
-  @media (min-width: 1024px) {
-    .dashboard__grid {
-      grid-template-columns: 1.1fr 1fr 1fr;
-    }
-    .card--clock {
-      grid-column: auto;
-    }
-  }
-  .eyebrow {
-    margin: 0 0 4px 0;
-    font-size: 0.8rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  
-  .dashboard__title {
-    margin: 0;
-    font-size: 2rem;
-    font-weight: 500;
-  }
-  
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: var(--radius);
-    padding: 24px;
-  }
-  
-  .card__placeholder {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  .card--clock {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-  }
-  
-  .clock {
-    position: relative;
-    width: 220px;
-    height: 220px;
-  }
-  
-  .clock__ring {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-  }
-  
-  .clock__ring-track {
-    fill: none;
-    stroke: var(--panel-border);
-    stroke-width: 6;
-  }
-  
+}
+
+.dashboard__left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.top-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+}
+
+/* ==========================================================================
+   CARD (shared shell for weather / calendar / activities — NOT the clock)
+   ========================================================================== */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.card__placeholder {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card--weather {
+  flex: 1;
+  min-width: 260px;
+}
+
+/* ==========================================================================
+   CLOCK — free-floating, no card shell. Colors are fixed white/gold now
+   (no more day/night blue swap).
+   ========================================================================== */
+.clock {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+.clock__ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.clock__ring-track {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 6;
+}
+
+.clock__ring-progress {
+  fill: none;
+  stroke: var(--accent-clock);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 565.5;
+  stroke-dashoffset: 565.5;
+  transition: stroke-dashoffset 0.3s linear;
+}
+
+.clock__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.clock__time {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.clock__period {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  color: var(--accent-clock);
+  letter-spacing: 0.1em;
+}
+
+/* ==========================================================================
+   WEATHER
+   ========================================================================== */
+.weather__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.weather__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.weather__temp {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 500;
+}
+
+.weather__label {
+  margin: 8px 0 4px 0;
+  font-size: 1rem;
+}
+
+.weather__range {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.weather__location {
+  margin-bottom: 20px;
+}
+
+.weather__location:last-child {
+  margin-bottom: 0;
+}
+
+.weather__location-name {
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.weather__forecast {
+  margin-top: 12px;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 8px;
+}
+
+.weather__day-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1.5rem 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 0.85rem;
+}
+
+.weather__day-name {
+  color: var(--text-muted);
+}
+
+.weather__day-icon {
+  font-size: 1rem;
+}
+
+.weather__day-high {
+  font-family: var(--font-display);
+  text-align: right;
+}
+
+.weather__day-low {
+  font-family: var(--font-display);
+  text-align: right;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   ACTIVITIES / CHECKLIST
+   ========================================================================== */
+.card--checklist {
+  display: flex;
+  flex-direction: column;
+}
+
+#checklist-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+
+#checklist-input::placeholder {
+  color: var(--text-muted);
+}
+
+.checklist__section {
+  margin-top: 16px;
+}
+
+.checklist__section-title {
+  margin: 0 0 8px 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+#checklist-items,
+#recurring-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
   .clock__ring-progress {
-    fill: none;
-    stroke: var(--accent-clock);
-    stroke-width: 6;
-    stroke-linecap: round;
-    stroke-dasharray: 565.5;
-    stroke-dashoffset: 565.5;
-    transition: stroke-dashoffset 0.3s linear, stroke 0.6s ease;
+    transition: none;
   }
-  
-  .clock__face {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-  
-  .clock__time {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-  }
-  
-  .clock__period {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    letter-spacing: 0.1em;
-  }
-  .weather__row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .weather__icon {
-    font-size: 2.5rem;
-    line-height: 1;
-  }
-  
-  .weather__temp {
-    font-family: var(--font-display);
-    font-size: 2.5rem;
-    font-weight: 500;
-  }
-  
-  .weather__label {
-    margin: 8px 0 4px 0;
-    font-size: 1rem;
-  }
-  
-  .weather__range {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .clock__ring-progress {
-      transition: none;
-    }
-  }
-  .weather__forecast {
-    margin-top: 12px;
-    border-top: 1px solid var(--panel-border);
-    padding-top: 8px;
-  }
-  
-  .weather__day-row {
-    display: grid;
-    grid-template-columns: 2.5rem 1.5rem 1fr 1fr;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 0;
-    font-size: 0.85rem;
-  }
-  
-  .weather__day-name {
-    color: var(--text-muted);
-  }
-  
-  .weather__day-icon {
-    font-size: 1rem;
-  }
-  
-  .weather__day-high {
-    font-family: var(--font-display);
-    text-align: right;
-  }
-  
-  .weather__day-low {
-    font-family: var(--font-display);
-    text-align: right;
-    color: var(--text-muted);
-  }
-  .weather__location {
-    margin-bottom: 20px;
-  }
-  
-  .weather__location:last-child {
-    margin-bottom: 0;
-  }
-  
-  .weather__location-name {
-    margin: 0 0 4px 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-  
-  :focus-visible {
-    outline: 2px solid var(--accent-clock);
-    outline-offset: 2px;
-  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-clock);
+  outline-offset: 2px;
+}

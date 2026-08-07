@@ -19,32 +19,54 @@
 
     <main class="dashboard__grid">
 
-      <section class="card card--clock" aria-label="Current time">
-        <div class="clock">
-          <svg class="clock__ring" viewBox="0 0 200 200" aria-hidden="true">
-            <circle class="clock__ring-track" cx="100" cy="100" r="90" />
-            <circle class="clock__ring-progress" id="ring-progress" cx="100" cy="100" r="90" />
-          </svg>
-          <div class="clock__face">
-            <span class="clock__time" id="clock-time">--:--:--</span>
-            <span class="clock__period" id="clock-period"></span>
-          </div>
-        </div>
-      </section>
+      <div class="dashboard__left">
 
-      <section class="card card--weather" aria-label="Weather">
-        <p class="eyebrow">Weather</p>
-        <div id="weather-content">
-          <p class="card__placeholder">Loading…</p>
+        <div class="top-row">
+
+          <div class="clock" aria-label="Current time">
+            <svg class="clock__ring" viewBox="0 0 200 200" aria-hidden="true">
+              <circle class="clock__ring-track" cx="100" cy="100" r="90" />
+              <circle class="clock__ring-progress" id="ring-progress" cx="100" cy="100" r="90" />
+            </svg>
+            <div class="clock__face">
+              <span class="clock__time" id="clock-time">--:--</span>
+              <span class="clock__period" id="clock-period"></span>
+            </div>
+          </div>
+
+          <section class="card card--weather" aria-label="Weather">
+            <p class="eyebrow">Weather</p>
+            <div id="weather-content">
+              <p class="card__placeholder">Loading…</p>
+            </div>
+          </section>
+
         </div>
-      </section>
+
+        <section class="card card--calendar" aria-label="Calendar">
+          <p class="eyebrow">Calendar</p>
+          <p class="card__placeholder">Coming soon — Google Calendar sign-in.</p>
+        </section>
+
+      </div>
 
       <section class="card card--checklist" aria-label="Activities">
         <p class="eyebrow">Activities</p>
+
         <form id="checklist-form">
           <input type="text" id="checklist-input" placeholder="Add an activity…" autocomplete="off" />
         </form>
-        <ul id="checklist-items"></ul>
+
+        <div class="checklist__section">
+          <p class="checklist__section-title">Recurring</p>
+          <ul id="recurring-items"></ul>
+        </div>
+
+        <div class="checklist__section">
+          <p class="checklist__section-title">Today</p>
+          <ul id="checklist-items"></ul>
+        </div>
+
       </section>
 
     </main>
