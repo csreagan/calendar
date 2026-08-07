@@ -295,7 +295,40 @@ body {
   margin: 0;
   padding: 0;
 }
+.checklist__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
 
+.checklist__item {
+  padding: 6px 0;
+}
+
+.checklist__item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.checklist__item input[type="checkbox"] {
+  accent-color: var(--accent-clock);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.checklist__empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
 /* ==========================================================================
    ACCESSIBILITY
    ========================================================================== */
