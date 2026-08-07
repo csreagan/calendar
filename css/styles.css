@@ -214,31 +214,43 @@ body {
   padding-top: 8px;
 }
 
-.weather__day-row {
-  display: grid;
-  grid-template-columns: 2.5rem 1.5rem 1fr 1fr;
+.weather__forecast {
+  margin-top: 12px;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 12px;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.weather__day-card {
+  flex: 0 0 auto;
+  width: 52px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  font-size: 0.85rem;
+  gap: 4px;
+  text-align: center;
 }
 
 .weather__day-name {
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .weather__day-icon {
-  font-size: 1rem;
+  font-size: 1.25rem;
 }
 
 .weather__day-high {
   font-family: var(--font-display);
-  text-align: right;
+  font-size: 0.85rem;
 }
 
 .weather__day-low {
   font-family: var(--font-display);
-  text-align: right;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 

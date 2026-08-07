@@ -87,18 +87,18 @@ const LOCATIONS = [
   }
   
   function renderLocationBlock(forecast) {
-    const dayRows = forecast.days
-      .map(
-        (day) => `
-          <div class="weather__day-row">
-            <span class="weather__day-name">${day.label}</span>
-            <span class="weather__day-icon">${day.icon}</span>
-            <span class="weather__day-high">${day.high}°</span>
-            <span class="weather__day-low">${day.low}°</span>
-          </div>
-        `
-      )
-      .join('');
+    const dayCards = forecast.days
+    .map(
+      (day) => `
+        <div class="weather__day-card">
+          <span class="weather__day-name">${day.label}</span>
+          <span class="weather__day-icon">${day.icon}</span>
+          <span class="weather__day-high">${day.high}°</span>
+          <span class="weather__day-low">${day.low}°</span>
+        </div>
+      `
+    )
+    .join('');
   
     return `
       <div class="weather__location">
@@ -110,7 +110,7 @@ const LOCATIONS = [
         <p class="weather__label">${forecast.label}</p>
         <p class="weather__range">H:${forecast.high}° L:${forecast.low}°</p>
         <div class="weather__forecast">
-          ${dayRows}
+        ${dayCards}
         </div>
       </div>
     `;
