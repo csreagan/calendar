@@ -1,13 +1,14 @@
-const LOCATION = {
-    name: 'bremerton WA',
-    latitude: 47.579629,
-    longitude: -122.622618,
+// ==========================================================================
+// WEATHER
+// ==========================================================================
 
-    name: 'Billings MT',
-    latitude: 45.783287,
-    longitude: -108.500687,
-  };
-
+const LOCATIONS = [
+    { name: 'Bremerton, WA', latitude: 47.579629, longitude: -122.622618 },
+    { name: 'Billings, MT', latitude: 45.783287, longitude: -108.500687 },
+  ];
+  
+  let currentLocation = LOCATIONS[0];
+  
   const WEATHER_CODES = {
     0: { label: 'Clear sky', icon: '☀️' },
     1: { label: 'Mostly clear', icon: '🌤️' },
@@ -33,12 +34,30 @@ const LOCATION = {
   function describeWeatherCode(code) {
     return WEATHER_CODES[code] || { label: 'Unknown', icon: '❔' };
   }
+  
+  function populateLocationDropdown() {
+    const select = document.getElementById('location-select');
+  
+    LOCATIONS.forEach((location, index) => {
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = location.name;
+      select.appendChild(option);
+    });
+  
+    select.addEventListener('change', () => {
+      currentLocation = LOCATIONS[select.value];
+      loadWeather();
+    });
+  }
+  
   async function loadWeather() {
     const card = document.getElementById('weather-content');
+    card.innerHTML = `<p class="card__placeholder">Loading…</p>`;
   
     const url =
       `https://api.open-meteo.com/v1/forecast` +
-      `?latitude=${LOCATION.latitude}&longitude=${LOCATION.longitude}` +
+      `?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}` +
       `&current=temperature_2m,weather_code` +
       `&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min` +
       `&temperature_unit=fahrenheit` +
@@ -46,25 +65,28 @@ const LOCATION = {
   
     try {
       const response = await fetch(url);
+  
       if (!response.ok) {
         throw new Error(`Weather API responded with status ${response.status}`);
       }
   
       const data = await response.json();
+  
       const temp = Math.round(data.current.temperature_2m);
-    const high = Math.round(data.daily.temperature_2m_max[0]);
-    const low = Math.round(data.daily.temperature_2m_min[0]);
-    const { label, icon } = describeWeatherCode(data.current.weather_code);
-
-    card.innerHTML = `
-      <div class="weather__row">
-        <span class="weather__icon">${icon}</span>
-        <span class="weather__temp">${temp}°</span>
-      </div>
-      <p class="weather__label">${label}</p>
-      <p class="weather__range">H:${high}° L:${low}° · ${LOCATION.name}</p>
-    `;
-    window.sunTimes = {
+      const high = Math.round(data.daily.temperature_2m_max[0]);
+      const low = Math.round(data.daily.temperature_2m_min[0]);
+      const { label, icon } = describeWeatherCode(data.current.weather_code);
+  
+      card.innerHTML = `
+        <div class="weather__row">
+          <span class="weather__icon">${icon}</span>
+          <span class="weather__temp">${temp}°</span>
+        </div>
+        <p class="weather__label">${label}</p>
+        <p class="weather__range">H:${high}° L:${low}°</p>
+      `;
+  
+      window.sunTimes = {
         sunrise: isoTimeToDecimalHour(data.daily.sunrise[0]),
         sunset: isoTimeToDecimalHour(data.daily.sunset[0]),
       };
@@ -73,8 +95,11 @@ const LOCATION = {
       card.innerHTML = `<p class="card__placeholder">Couldn't load weather right now.</p>`;
     }
   }
+  
   function isoTimeToDecimalHour(isoString) {
     const time = isoString.split('T')[1];
     const [h, m] = time.split(':').map(Number);
     return h + m / 60;
   }
+  
+  populateLocationDropdown();
