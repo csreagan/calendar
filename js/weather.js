@@ -7,8 +7,6 @@ const LOCATIONS = [
     { name: 'Billings, MT', latitude: 45.783287, longitude: -108.500687 },
   ];
   
-  let currentLocation = LOCATIONS[0];
-  
   const WEATHER_CODES = {
     0: { label: 'Clear sky', icon: '☀️' },
     1: { label: 'Mostly clear', icon: '🌤️' },
@@ -35,65 +33,51 @@ const LOCATIONS = [
     return WEATHER_CODES[code] || { label: 'Unknown', icon: '❔' };
   }
   
-  function populateLocationDropdown() {
-    const select = document.getElementById('location-select');
-  
-    LOCATIONS.forEach((location, index) => {
-      const option = document.createElement('option');
-      option.value = index;
-      option.textContent = location.name;
-      select.appendChild(option);
-    });
-  
-    select.addEventListener('change', () => {
-      currentLocation = LOCATIONS[select.value];
-      loadWeather();
-    });
-  }
-  
-  async function loadWeather() {
-    const card = document.getElementById('weather-content');
-    card.innerHTML = `<p class="card__placeholder">Loading…</p>`;
-  
+  async function getForecast(location) {
     const url =
       `https://api.open-meteo.com/v1/forecast` +
-      `?latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}` +
+      `?latitude=${location.latitude}&longitude=${location.longitude}` +
       `&current=temperature_2m,weather_code` +
-      `&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min` +
+      `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min` +
+      `&forecast_days=10` +
       `&temperature_unit=fahrenheit` +
       `&timezone=auto`;
   
-    try {
-      const response = await fetch(url);
+    const response = await fetch(url);
   
-      if (!response.ok) {
-        throw new Error(`Weather API responded with status ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      const temp = Math.round(data.current.temperature_2m);
-      const high = Math.round(data.daily.temperature_2m_max[0]);
-      const low = Math.round(data.daily.temperature_2m_min[0]);
-      const { label, icon } = describeWeatherCode(data.current.weather_code);
-  
-      card.innerHTML = `
-        <div class="weather__row">
-          <span class="weather__icon">${icon}</span>
-          <span class="weather__temp">${temp}°</span>
-        </div>
-        <p class="weather__label">${label}</p>
-        <p class="weather__range">H:${high}° L:${low}°</p>
-      `;
-  
-      window.sunTimes = {
-        sunrise: isoTimeToDecimalHour(data.daily.sunrise[0]),
-        sunset: isoTimeToDecimalHour(data.daily.sunset[0]),
-      };
-    } catch (error) {
-      console.error('Failed to load weather:', error);
-      card.innerHTML = `<p class="card__placeholder">Couldn't load weather right now.</p>`;
+    if (!response.ok) {
+      throw new Error(`Weather API responded with status ${response.status}`);
     }
+  
+    const data = await response.json();
+    const { label, icon } = describeWeatherCode(data.current.weather_code);
+  
+    const days = data.daily.time.map((dateString, index) => {
+      const dayCode = describeWeatherCode(data.daily.weather_code[index]);
+      return {
+        label: index === 0 ? 'Today' : formatDayName(dateString),
+        icon: dayCode.icon,
+        high: Math.round(data.daily.temperature_2m_max[index]),
+        low: Math.round(data.daily.temperature_2m_min[index]),
+      };
+    });
+  
+    return {
+      name: location.name,
+      temp: Math.round(data.current.temperature_2m),
+      high: days[0].high,
+      low: days[0].low,
+      label,
+      icon,
+      sunrise: isoTimeToDecimalHour(data.daily.sunrise[0]),
+      sunset: isoTimeToDecimalHour(data.daily.sunset[0]),
+      days,
+    };
+  }
+  
+  function formatDayName(dateString) {
+    const date = new Date(`${dateString}T00:00`);
+    return date.toLocaleDateString(undefined, { weekday: 'short' });
   }
   
   function isoTimeToDecimalHour(isoString) {
@@ -102,4 +86,50 @@ const LOCATIONS = [
     return h + m / 60;
   }
   
-  populateLocationDropdown();
+  function renderLocationBlock(forecast) {
+    const dayRows = forecast.days
+      .map(
+        (day) => `
+          <div class="weather__day-row">
+            <span class="weather__day-name">${day.label}</span>
+            <span class="weather__day-icon">${day.icon}</span>
+            <span class="weather__day-high">${day.high}°</span>
+            <span class="weather__day-low">${day.low}°</span>
+          </div>
+        `
+      )
+      .join('');
+  
+    return `
+      <div class="weather__location">
+        <p class="weather__location-name">${forecast.name}</p>
+        <div class="weather__row">
+          <span class="weather__icon">${forecast.icon}</span>
+          <span class="weather__temp">${forecast.temp}°</span>
+        </div>
+        <p class="weather__label">${forecast.label}</p>
+        <p class="weather__range">H:${forecast.high}° L:${forecast.low}°</p>
+        <div class="weather__forecast">
+          ${dayRows}
+        </div>
+      </div>
+    `;
+  }
+  
+  async function loadWeather() {
+    const card = document.getElementById('weather-content');
+  
+    try {
+      const forecasts = await Promise.all(LOCATIONS.map(getForecast));
+  
+      card.innerHTML = forecasts.map(renderLocationBlock).join('');
+  
+      window.sunTimes = {
+        sunrise: forecasts[0].sunrise,
+        sunset: forecasts[0].sunset,
+      };
+    } catch (error) {
+      console.error('Failed to load weather:', error);
+      card.innerHTML = `<p class="card__placeholder">Couldn't load weather right now.</p>`;
+    }
+  }

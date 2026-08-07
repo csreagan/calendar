@@ -9,12 +9,16 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+
   <div class="dashboard">
+
     <header class="dashboard__header">
       <p class="eyebrow" id="today-date">Loading date…</p>
       <h1 class="dashboard__title">Dashboard</h1>
     </header>
+
     <main class="dashboard__grid">
+
       <section class="card card--clock" aria-label="Current time">
         <div class="clock">
           <svg class="clock__ring" viewBox="0 0 200 200" aria-hidden="true">
@@ -42,17 +46,9 @@
         </form>
         <ul id="checklist-items"></ul>
       </section>
+
     </main>
   </div>
-  <section class="card card--weather" aria-label="Weather">
-    <div class="weather__header">
-      <p class="eyebrow">Weather</p>
-      <select id="location-select"></select>
-    </div>
-    <div id="weather-content">
-      <p class="card__placeholder">Loading…</p>
-    </div>
-  </section>
 
   <script src="js/clock.js"></script>
   <script src="js/weather.js"></script>

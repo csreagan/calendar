@@ -172,6 +172,52 @@
       transition: none;
     }
   }
+  .weather__forecast {
+    margin-top: 12px;
+    border-top: 1px solid var(--panel-border);
+    padding-top: 8px;
+  }
+  
+  .weather__day-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1.5rem 1fr 1fr;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 0.85rem;
+  }
+  
+  .weather__day-name {
+    color: var(--text-muted);
+  }
+  
+  .weather__day-icon {
+    font-size: 1rem;
+  }
+  
+  .weather__day-high {
+    font-family: var(--font-display);
+    text-align: right;
+  }
+  
+  .weather__day-low {
+    font-family: var(--font-display);
+    text-align: right;
+    color: var(--text-muted);
+  }
+  .weather__location {
+    margin-bottom: 20px;
+  }
+  
+  .weather__location:last-child {
+    margin-bottom: 0;
+  }
+  
+  .weather__location-name {
+    margin: 0 0 4px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
   
   :focus-visible {
     outline: 2px solid var(--accent-clock);
