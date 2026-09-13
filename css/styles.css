@@ -344,37 +344,46 @@ body {
 }
 
 
-.calendar__signin-btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--panel-border);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.calendar__signin-btn:hover {
-  border-color: var(--accent-clock);
-}
-
-.calendar__event {
+.calendar__week {
   display: flex;
   gap: 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--panel-border);
-  font-size: 0.9rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
-.calendar__event:last-child {
-  border-bottom: none;
+.calendar__day-column {
+  flex: 1 0 120px;
+  min-width: 120px;
 }
 
-.calendar__event-time {
-  flex-shrink: 0;
-  width: 90px;
+.calendar__day-header {
+  margin: 0 0 8px 0;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--text-muted);
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 6px;
+}
+
+.calendar__day-event {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+}
+
+.calendar__day-event-time {
   font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.calendar__day-event-title {
+  line-height: 1.3;
+}
+
+.calendar__day-empty {
+  color: var(--text-muted);
   font-size: 0.8rem;
 }

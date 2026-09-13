@@ -1,9 +1,5 @@
 // ==========================================================================
 // CALENDAR
-// Uses Google Identity Services (GIS) for browser-only OAuth — no backend,
-// no client secret. The flow: user clicks a button, Google shows a popup
-// to sign in and approve access, and we get back a short-lived access
-// token we can use to call the Calendar API directly from the browser.
 // ==========================================================================
 
 const CLIENT_ID = '312386544320-f48i3uuqtve0jgo9lapuhms2d9rt102o.apps.googleusercontent.com';
@@ -33,10 +29,17 @@ async function loadCalendarEvents(accessToken) {
   const content = document.getElementById('calendar-content');
   content.innerHTML = `<p class="card__placeholder">Loading events…</p>`;
 
-  const now = new Date().toISOString();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(today);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+
   const url =
     `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
-    `?timeMin=${now}&maxResults=10&singleEvents=true&orderBy=startTime`;
+    `?timeMin=${today.toISOString()}` +
+    `&timeMax=${weekEnd.toISOString()}` +
+    `&maxResults=50&singleEvents=true&orderBy=startTime`;
 
   try {
     const response = await fetch(url, {
@@ -48,44 +51,76 @@ async function loadCalendarEvents(accessToken) {
     }
 
     const data = await response.json();
-    renderEvents(data.items);
+    renderWeekView(data.items || [], today);
   } catch (error) {
     console.error('Failed to load calendar events:', error);
     content.innerHTML = `<p class="card__placeholder">Couldn't load events.</p>`;
   }
 }
 
-function renderEvents(events) {
+function getEventDate(event) {
+  return event.start.dateTime
+    ? new Date(event.start.dateTime)
+    : new Date(`${event.start.date}T00:00`);
+}
+
+function formatEventTime(event) {
+  if (!event.start.dateTime) return 'All day';
+  return new Date(event.start.dateTime).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function renderWeekView(events, weekStart) {
   const content = document.getElementById('calendar-content');
 
-  if (!events || events.length === 0) {
-    content.innerHTML = `<p class="card__placeholder">No upcoming events.</p>`;
-    return;
-  }
+  // Build the 7 days of the week, each as { date, dateKey, events: [] }
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(weekStart);
+    date.setDate(date.getDate() + i);
+    return { date, dateKey: date.toDateString(), events: [] };
+  });
 
-  content.innerHTML = events
-    .map((event) => {
-      const start = event.start.dateTime || event.start.date;
-      const label = event.start.dateTime
-        ? new Date(start).toLocaleString(undefined, {
-            weekday: 'short',
-            hour: 'numeric',
-            minute: '2-digit',
-          })
-        : new Date(`${start}T00:00`).toLocaleDateString(undefined, {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric',
-          });
+  // Sort each event into the matching day by comparing date strings
+  events.forEach((event) => {
+    const eventDateKey = getEventDate(event).toDateString();
+    const day = days.find((d) => d.dateKey === eventDateKey);
+    if (day) day.events.push(event);
+  });
+
+  const dayColumns = days
+    .map((day) => {
+      const dayLabel = day.date.toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+
+      const eventsHtml =
+        day.events.length === 0
+          ? `<p class="calendar__day-empty">—</p>`
+          : day.events
+              .map(
+                (event) => `
+                  <div class="calendar__day-event">
+                    <span class="calendar__day-event-time">${formatEventTime(event)}</span>
+                    <span class="calendar__day-event-title">${event.summary || '(No title)'}</span>
+                  </div>
+                `
+              )
+              .join('');
 
       return `
-        <div class="calendar__event">
-          <span class="calendar__event-time">${label}</span>
-          <span class="calendar__event-title">${event.summary || '(No title)'}</span>
+        <div class="calendar__day-column">
+          <p class="calendar__day-header">${dayLabel}</p>
+          ${eventsHtml}
         </div>
       `;
     })
     .join('');
+
+  content.innerHTML = `<div class="calendar__week">${dayColumns}</div>`;
 }
 
 window.addEventListener('load', initCalendarSignIn);
