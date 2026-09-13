@@ -342,3 +342,39 @@ body {
   outline: 2px solid var(--accent-clock);
   outline-offset: 2px;
 }
+
+
+.calendar__signin-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.calendar__signin-btn:hover {
+  border-color: var(--accent-clock);
+}
+
+.calendar__event {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+  font-size: 0.9rem;
+}
+
+.calendar__event:last-child {
+  border-bottom: none;
+}
+
+.calendar__event-time {
+  flex-shrink: 0;
+  width: 90px;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+}
