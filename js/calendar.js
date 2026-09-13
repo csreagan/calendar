@@ -88,4 +88,4 @@ function renderEvents(events) {
     .join('');
 }
 
-initCalendarSignIn();
+window.addEventListener('load', initCalendarSignIn);
