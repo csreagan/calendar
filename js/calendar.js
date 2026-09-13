@@ -1,5 +1,6 @@
 // ==========================================================================
 // CALENDAR
+// One sign-in, one fetch — feeds both the week columns and the month grid.
 // ==========================================================================
 
 const CLIENT_ID = '312386544320-f48i3uuqtve0jgo9lapuhms2d9rt102o.apps.googleusercontent.com';
@@ -26,20 +27,27 @@ function initCalendarSignIn() {
 }
 
 async function loadCalendarEvents(accessToken) {
-  const content = document.getElementById('calendar-content');
-  content.innerHTML = `<p class="card__placeholder">Loading events…</p>`;
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const weekEnd = new Date(today);
   weekEnd.setDate(weekEnd.getDate() + 7);
 
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  // Fetch a window wide enough to cover BOTH the rolling week and the
+  // whole calendar month, whichever stretches further in each direction.
+  const fetchStart = monthStart < today ? monthStart : today;
+  const fetchEndCandidate = new Date(monthEnd);
+  fetchEndCandidate.setDate(fetchEndCandidate.getDate() + 1);
+  const fetchEnd = fetchEndCandidate > weekEnd ? fetchEndCandidate : weekEnd;
+
   const url =
     `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
-    `?timeMin=${today.toISOString()}` +
-    `&timeMax=${weekEnd.toISOString()}` +
-    `&maxResults=50&singleEvents=true&orderBy=startTime`;
+    `?timeMin=${fetchStart.toISOString()}` +
+    `&timeMax=${fetchEnd.toISOString()}` +
+    `&maxResults=100&singleEvents=true&orderBy=startTime`;
 
   try {
     const response = await fetch(url, {
@@ -51,10 +59,16 @@ async function loadCalendarEvents(accessToken) {
     }
 
     const data = await response.json();
-    renderWeekView(data.items || [], today);
+    const events = data.items || [];
+
+    renderWeekView(events, today);
+    renderMonthView(events, monthStart, monthEnd, today);
   } catch (error) {
     console.error('Failed to load calendar events:', error);
-    content.innerHTML = `<p class="card__placeholder">Couldn't load events.</p>`;
+    document.getElementById('week-content').innerHTML =
+      `<p class="card__placeholder">Couldn't load events.</p>`;
+    document.getElementById('month-content').innerHTML =
+      `<p class="card__placeholder">Couldn't load events.</p>`;
   }
 }
 
@@ -72,17 +86,17 @@ function formatEventTime(event) {
   });
 }
 
-function renderWeekView(events, weekStart) {
-  const content = document.getElementById('calendar-content');
+// --- Week view (unchanged from before) ---
 
-  // Build the 7 days of the week, each as { date, dateKey, events: [] }
+function renderWeekView(events, weekStart) {
+  const content = document.getElementById('week-content');
+
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(weekStart);
     date.setDate(date.getDate() + i);
     return { date, dateKey: date.toDateString(), events: [] };
   });
 
-  // Sort each event into the matching day by comparing date strings
   events.forEach((event) => {
     const eventDateKey = getEventDate(event).toDateString();
     const day = days.find((d) => d.dateKey === eventDateKey);
@@ -121,6 +135,65 @@ function renderWeekView(events, weekStart) {
     .join('');
 
   content.innerHTML = `<div class="calendar__week">${dayColumns}</div>`;
+}
+
+// --- Month view (new) ---
+
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function renderMonthView(events, monthStart, monthEnd, today) {
+  document.getElementById('month-title').textContent =
+    monthStart.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const content = document.getElementById('month-content');
+  const daysInMonth = monthEnd.getDate();
+  const firstWeekday = monthStart.getDay(); // 0 = Sunday
+
+  // Group events by date string, but only ones that actually fall in this month
+  const eventsByDate = {};
+  events.forEach((event) => {
+    const eventDate = getEventDate(event);
+    if (eventDate < monthStart || eventDate > monthEnd) return;
+    const key = eventDate.toDateString();
+    if (!eventsByDate[key]) eventsByDate[key] = [];
+    eventsByDate[key].push(event);
+  });
+
+  const weekdayHeaders = WEEKDAY_LABELS.map(
+    (label) => `<span class="calendar__month-weekday">${label}</span>`
+  ).join('');
+
+  // Empty cells before day 1, so day 1 lands under the correct weekday column
+  const leadingBlanks = Array.from(
+    { length: firstWeekday },
+    () => `<div class="calendar__month-day calendar__month-day--empty"></div>`
+  ).join('');
+
+  const dayCells = Array.from({ length: daysInMonth }, (_, i) => {
+    const dayNumber = i + 1;
+    const cellDate = new Date(monthStart.getFullYear(), monthStart.getMonth(), dayNumber);
+    const dayEvents = eventsByDate[cellDate.toDateString()] || [];
+    const isToday = cellDate.toDateString() === today.toDateString();
+
+    const dot = dayEvents.length > 0 ? `<span class="calendar__month-day-dot"></span>` : '';
+    const timeLabel =
+      dayEvents.length > 0
+        ? `<span class="calendar__month-day-time">${formatEventTime(dayEvents[0])}</span>`
+        : '';
+
+    return `
+      <div class="calendar__month-day${isToday ? ' calendar__month-day--today' : ''}">
+        <span class="calendar__month-day-number">${dayNumber}</span>
+        ${dot}
+        ${timeLabel}
+      </div>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="calendar__month-weekdays">${weekdayHeaders}</div>
+    <div class="calendar__month-grid">${leadingBlanks}${dayCells}</div>
+  `;
 }
 
 window.addEventListener('load', initCalendarSignIn);

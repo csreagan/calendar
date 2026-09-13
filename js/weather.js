@@ -39,7 +39,7 @@ const LOCATIONS = [
       `?latitude=${location.latitude}&longitude=${location.longitude}` +
       `&current=temperature_2m,weather_code` +
       `&daily=sunrise,sunset,weather_code,temperature_2m_max,temperature_2m_min` +
-      `&forecast_days=10` +
+      `&forecast_days=5` +
       `&temperature_unit=fahrenheit` +
       `&timezone=auto`;
   
